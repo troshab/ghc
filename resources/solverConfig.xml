@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<solver>
+    <solutionClass>com.fido.solution.Slideshow</solutionClass>
+    <entityClass>com.fido.entity.Slide</entityClass>
+
+    <scoreDirectorFactory>
+        <scoreDrl>scoreRules.drl</scoreDrl>
+    </scoreDirectorFactory>
+
+    <termination>
+        <!--minutesSpentLimit>2</minutesSpentLimit-->
+        <secondsSpentLimit>10</secondsSpentLimit>
+    </termination>>
+</solver>

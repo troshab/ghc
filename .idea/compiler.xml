@@ -10,7 +10,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="ghc" target="7" />
+      <module name="ghc" target="8" />
     </bytecodeTargetLevel>
   </component>
 </project>

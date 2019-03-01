@@ -2,14 +2,13 @@ package com.fido;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
+import com.fido.entity.Slide;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Parse {
     private static Integer tagsID_AI = 0;
@@ -17,7 +16,8 @@ public class Parse {
 
     private static Integer photosID_AI = 0;
     private static Map<String, BitSet> verticalPhotos = new HashMap<>();
-    private static Map<String, BitSet> slides = new HashMap<>();
+    private static Map<String, Boolean> verticalParsedPairs = new HashMap<>();
+    private static List<Slide> slides = new LinkedList<>();
 
     private static int filesCountPromised = 0;
     private static int filesCountFound = 0;
@@ -89,7 +89,8 @@ public class Parse {
                         System.exit(-1);
                     } else {
                         if (isHorizontal) {
-                            slides.put(photosID_AI.toString(), tags);
+                            Slide newSlide = new Slide(photosID_AI.toString(), tags);
+                            slides.add(newSlide);
                         } else {
                             verticalPhotos.put(photosID_AI.toString(), tags);
                         }
@@ -128,29 +129,33 @@ public class Parse {
                     Integer verticalPhoto1ID = Integer.valueOf(verticalPhoto1.getKey());
                     Integer verticalPhoto2ID = Integer.valueOf(verticalPhoto2.getKey());
                     String slidesKey = verticalPhoto1ID < verticalPhoto2ID ? verticalPhoto1.getKey() + " " + verticalPhoto2.getKey() : verticalPhoto2.getKey() + " " + verticalPhoto1.getKey();
-                    if (!slides.containsKey(slidesKey)) {
+                    if (!verticalParsedPairs.containsKey(slidesKey)) {
                         BitSet twoVerticalPhotoTags = (BitSet) verticalPhoto1.getValue().clone();
                         twoVerticalPhotoTags.or(verticalPhoto2.getValue());
-                        slides.put(slidesKey, twoVerticalPhotoTags);
+
+                        Slide newSlide = new Slide(photosID_AI.toString(), twoVerticalPhotoTags);
+                        slides.add(newSlide);
+                        verticalParsedPairs.put(slidesKey, true);
                     }
                 }
             }
             System.gc();
         }
         long endTime   = System.nanoTime();
-        long totalTime = (endTime - startTime) / 1000000;
-        System.out.println("Time: " + totalTime + "s");
+        long totalTime = (endTime - startTime) / 1000 / 1000 / 1000;
+        System.out.println("Done in " + totalTime + "s");
         try {
             System.out.println("Saving binary");
             startTime = System.nanoTime();
             Kryo kryo = new Kryo();
+            kryo.addDefaultSerializer(BitSet.class, new BitSetSerializer());
 
             Output output = new Output(new FileOutputStream(Config.filename + ".bin"));
             kryo.writeObject(output, slides);
             output.close();
             endTime   = System.nanoTime();
-            totalTime = (endTime - startTime) / 1000000;
-            System.out.print("Saved to " + Config.filename + ".bin time: " + totalTime + "s");
+            totalTime = (endTime - startTime)  / 1000 / 1000 / 1000;
+            System.out.print("Saved to " + Config.filename + ".bin in " + totalTime + "s");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
