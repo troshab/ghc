@@ -73,11 +73,7 @@ public class Parse {
                         tagsCountPromised = Integer.parseInt(word);
                         state = 2;
                     } else {
-                        if (word.equals("H")) {
-                            isHorizontal = true;
-                        } else {
-                            isHorizontal = false;
-                        }
+                        isHorizontal = word.equals("H");
                         state = 1;
                     }
                     word = "";
